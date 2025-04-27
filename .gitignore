@@ -21,4 +21,8 @@ ENV/
 
 # Project specific
 data/*
-!data/.gitkeep 
+!data/.gitkeep
+!data/rawData/
+data/rawData/*
+!data/rawData/.gitkeep
+!data/rawData/*.pdf 
