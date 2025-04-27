@@ -24,5 +24,4 @@ data/*
 !data/.gitkeep
 !data/rawData/
 data/rawData/*
-!data/rawData/.gitkeep
-!data/rawData/*.pdf 
+!data/rawData/.gitkeep 
