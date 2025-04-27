@@ -3,6 +3,12 @@
 import os
 import sys
 from pathlib import Path
+from helper import (
+    ensure_directory_exists,
+    get_raw_data_files,
+    get_pdf_files,
+    print_file_list
+)
 
 def main():
     """
@@ -15,12 +21,18 @@ def main():
     data_dir = project_root / "data"
     config_dir = project_root / "config"
     
-    if not data_dir.exists():
-        data_dir.mkdir(parents=True)
-    if not config_dir.exists():
-        config_dir.mkdir(parents=True)
+    ensure_directory_exists(data_dir)
+    ensure_directory_exists(config_dir)
     
-    print("Application started successfully!")
+    # Get and print all files in rawData
+    all_files = get_raw_data_files()
+    print_file_list(all_files, "All files in rawData directory")
+    
+    # Get and print all PDF files
+    pdf_files = get_pdf_files()
+    print_file_list(pdf_files, "PDF files in rawData directory")
+    
+    print("\nApplication started successfully!")
 
 if __name__ == "__main__":
     main() 
