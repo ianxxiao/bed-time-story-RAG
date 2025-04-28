@@ -3,7 +3,7 @@ import requests
 import os
 from mistralai import Mistral
 from pathlib import Path
-from helper import ensure_directory_exists
+from functions.helper import ensure_directory_exists
 
 def encode_image(image_path):
     """Encode the image to base64."""
@@ -54,6 +54,7 @@ def perform_ocr_file(file, ocr_method="Mistral OCR"):
 
                 signed_url = client.files.get_signed_url(file_id=uploaded_pdf.id)
                 
+                print(f"Extracting: {file.name}")
                 ocr_response = client.ocr.process(
                     model="mistral-ocr-latest",
                     document={

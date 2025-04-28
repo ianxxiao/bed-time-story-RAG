@@ -3,13 +3,13 @@
 import os
 import sys
 from pathlib import Path
-from helper import (
+from functions.helper import (
     ensure_directory_exists,
     get_pdf_files,
     print_file_list
 )
 
-from OCR import perform_ocr_file
+from functions.OCR import perform_ocr_file
 
 def main():
     """
@@ -20,10 +20,7 @@ def main():
     
     # Ensure data and config directories exist
     data_dir = project_root / "data"
-    config_dir = project_root / "config"
-    
     ensure_directory_exists(data_dir)
-    ensure_directory_exists(config_dir)
 
     # Get and print all PDF files
     pdf_files = get_pdf_files()
