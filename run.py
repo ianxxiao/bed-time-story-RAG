@@ -5,10 +5,11 @@ import sys
 from pathlib import Path
 from helper import (
     ensure_directory_exists,
-    get_raw_data_files,
     get_pdf_files,
     print_file_list
 )
+
+from OCR import perform_ocr_file
 
 def main():
     """
@@ -23,16 +24,26 @@ def main():
     
     ensure_directory_exists(data_dir)
     ensure_directory_exists(config_dir)
-    
-    # Get and print all files in rawData
-    all_files = get_raw_data_files()
-    print_file_list(all_files, "All files in rawData directory")
-    
+
     # Get and print all PDF files
     pdf_files = get_pdf_files()
     print_file_list(pdf_files, "PDF files in rawData directory")
+
+    # Process each PDF through OCR
+    print("\nProcessing PDFs through OCR...")
+
+    for pdf_file in pdf_files:
+
+        print(f"\nProcessing {pdf_file.name}...")
+
+        success, error = perform_ocr_file(pdf_file)
+        
+        if success:
+            print(f"Successfully processed {pdf_file.name}")
+        else:
+            print(f"Failed to process: {pdf_file.name} - {error}")
     
-    print("\nApplication started successfully!")
+    print("\nApplication ran successfully!")
 
 if __name__ == "__main__":
     main() 

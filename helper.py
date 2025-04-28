@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from dotenv import load_dotenv
+# Load environment variables
+load_dotenv()
 
 def ensure_directory_exists(directory_path):
     """
@@ -20,18 +23,6 @@ def ensure_directory_exists(directory_path):
     except Exception as e:
         print(f"Error creating directory {directory_path}: {e}")
         return False
-
-def get_raw_data_files():
-    """
-    Get all files from the /data/rawData directory.
-    
-    Returns:
-        list: List of file paths
-    """
-    raw_data_dir = Path(__file__).parent / "data" / "rawData"
-    if ensure_directory_exists(raw_data_dir):
-        return list(raw_data_dir.glob("*"))
-    return []
 
 def get_pdf_files():
     """
@@ -55,4 +46,4 @@ def print_file_list(files, title):
     """
     print(f"\n{title}:")
     for file in files:
-        print(f"- {file.name}") 
+        print(f"- {file.name}")
