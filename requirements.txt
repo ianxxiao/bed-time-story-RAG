@@ -6,4 +6,5 @@ pandas>=2.0.0
 docling>=0.1.0
 openai>=1.0.0
 sentence-transformers>=4.1.0
-cerebras_cloud_sdk>=1.29.0 
+cerebras_cloud_sdk>=1.29.0
+firebase-admin>=6.8.0 

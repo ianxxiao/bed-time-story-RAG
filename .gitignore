@@ -24,4 +24,9 @@ data/*
 !data/.gitkeep
 !data/rawData/
 data/rawData/*
-!data/rawData/.gitkeep 
+!data/rawData/.gitkeep
+
+# Firebase
+firebase-key.json
+*-firebase-adminsdk-*.json
+firebase-credentials.json 

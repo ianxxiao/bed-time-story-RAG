@@ -11,12 +11,18 @@ import time
 from pprint import pprint
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 def main():
     """
     Main function to run RAG pipelien.
     """
+    book = "The Blue Fairy Book"
     raw_file_path = Path(__file__).parent / "rawData" / "TheBlueFairyBook.pdf"
+    cred = credentials.Certificate("bed-time-story-23cd6-firebase-adminsdk-fbsvc-d1d12b089d.json")
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
 
     #1. Convert the document to markdown
     success, error, combined_markdown, raw_markdown = perform_ocr_file(raw_file_path)
@@ -38,8 +44,13 @@ def main():
             chunks_with_embeddings_metadata.append({
                 "text": chunk,
                 "metadata": generate_metadata_from_chunk(chunk),
-                "embedding": embeddings[i]
+                "embedding": embeddings[i].tolist(),
+                "book": book
             })
+
+            db.collection("stories").add(chunks_with_embeddings_metadata[i])
+
+        #4. Upload the chunks to Firebase
 
         pprint(chunks_with_embeddings_metadata[0:2])
 
