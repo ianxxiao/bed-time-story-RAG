@@ -3,44 +3,45 @@
 import os
 import sys
 from pathlib import Path
-from functions.helper import (
-    ensure_directory_exists,
-    get_pdf_files,
-    print_file_list
-)
-
-from functions.OCR import perform_ocr_file
+from OCR import perform_ocr_file
+from chunking import fixed_chunk_size, fixed_chunk_overlap
+from metadata import generate_metadata_from_chunk
+from embedding import embed
+import time
+from pprint import pprint
+from tqdm import tqdm
+from sentence_transformers import SentenceTransformer
 
 def main():
     """
-    Main function to run the application.
+    Main function to run RAG pipelien.
     """
-    # Get the project root directory
-    project_root = Path(__file__).parent
-    
-    # Ensure data and config directories exist
-    data_dir = project_root / "data"
-    ensure_directory_exists(data_dir)
+    raw_file_path = Path(__file__).parent / "rawData" / "TheBlueFairyBook.pdf"
 
-    # Get and print all PDF files
-    pdf_files = get_pdf_files()
-    print_file_list(pdf_files, "PDF files in rawData directory")
+    #1. Convert the document to markdown
+    success, error, combined_markdown, raw_markdown = perform_ocr_file(raw_file_path)
 
-    # Process each PDF through OCR
-    print("\nProcessing PDFs through OCR...")
+    if success:
+        #2. Chunk the markdown into sections
+        chunks = fixed_chunk_overlap(raw_markdown)
 
-    for pdf_file in pdf_files:
+        #3. Embed the chunks
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = model.encode(chunks)
 
-        print(f"\nProcessing {pdf_file.name}...")
+        #3. Generate metadata and embeddings for each chunk
+        chunks_with_embeddings_metadata = []
+        for i, chunk in enumerate(tqdm(chunks[10:15], desc="Generating metadata", unit="chunk")):
+            
+            time.sleep(5)  # 5 second pause
 
-        success, error = perform_ocr_file(pdf_file)
-        
-        if success:
-            print(f"Successfully processed {pdf_file.name}")
-        else:
-            print(f"Failed to process: {pdf_file.name} - {error}")
-    
-    print("\nApplication ran successfully!")
+            chunks_with_embeddings_metadata.append({
+                "text": chunk,
+                "metadata": generate_metadata_from_chunk(chunk),
+                "embedding": embeddings[i]
+            })
+
+        pprint(chunks_with_embeddings_metadata[0:2])
 
 if __name__ == "__main__":
-    main() 
+    main()

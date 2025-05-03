@@ -3,7 +3,7 @@ import requests
 import os
 from mistralai import Mistral
 from pathlib import Path
-from functions.helper import ensure_directory_exists
+from helper import ensure_directory_exists
 
 def encode_image(image_path):
     """Encode the image to base64."""
@@ -42,7 +42,7 @@ def perform_ocr_file(file, ocr_method="Mistral OCR"):
         if ocr_method == "Mistral OCR":
             if file.name.endswith('.pdf'):
 
-                print(f"Uploading file to Mistral: {file.name}")
+                print(f" >>> Uploading file to Mistral: {file.name}")
                 
                 uploaded_pdf = client.files.upload(
                     file={
@@ -54,7 +54,7 @@ def perform_ocr_file(file, ocr_method="Mistral OCR"):
 
                 signed_url = client.files.get_signed_url(file_id=uploaded_pdf.id)
                 
-                print(f"Extracting: {file.name}")
+                print(f" >>> Extracting text from: {file.name}")
                 ocr_response = client.ocr.process(
                     model="mistral-ocr-latest",
                     document={
@@ -82,22 +82,27 @@ def perform_ocr_file(file, ocr_method="Mistral OCR"):
             combined_markdown, raw_markdown = get_combined_markdown(ocr_response)
 
             # Save processed data to files
-            processed_data_dir = Path(__file__).parent / "data" / "processedData"
-            ensure_directory_exists(processed_data_dir)
+            print("\n >>>Saving Markdown files")
+            markdown_data_dir = Path(__file__).parent / "data" / "markdownData"
+            ensure_directory_exists(markdown_data_dir)
             
             # Create filenames based on input file
             base_name = file.stem
-            combined_path = processed_data_dir / f"{base_name}_combined.md"
-            raw_path = processed_data_dir / f"{base_name}_raw.md"
+            combined_path = markdown_data_dir / f"{base_name}_combined.md"
+            raw_path = markdown_data_dir / f"{base_name}_raw.md"
             
             # Write the markdown files
             combined_path.write_text(combined_markdown)
             raw_path.write_text(raw_markdown)
 
-            return True, None
+            return True, None, combined_markdown, raw_markdown
 
         return False, None
     
     except Exception as e:
         print(f"Error: {str(e)}")
         return False, f"Error: {str(e)}"
+    
+
+
+
