@@ -46,18 +46,19 @@ def main():
 
         #3. Generate metadata and embeddings for each chunk
         chunks_with_embeddings_metadata = []
-        for i, chunk in enumerate(tqdm(chunks[10:15], desc="Generating metadata", unit="chunk")):
+        for i, chunk in enumerate(tqdm(chunks, desc="Generating metadata", unit="chunk")):
             
-            time.sleep(5)  # 5 second pause
+            time.sleep(4.5)
 
             chunks_with_embeddings_metadata.append({
+                "chunk_idx": str(i),
                 "text": chunk,
                 "metadata": generate_metadata_from_chunk(chunk),
                 "embedding": embeddings[i].tolist(),
                 "book": book
             })
 
-            db.collection("stories").document(chunks_with_embeddings_metadata[i]["text"]).set(chunks_with_embeddings_metadata[i])
+            db.collection("stories").document(chunks_with_embeddings_metadata[i]["chunk_idx"]).set(chunks_with_embeddings_metadata[i])
 
         #4. Save chunks to a file
         chunks_dir = Path(__file__).parent / "data" / "chunks"
