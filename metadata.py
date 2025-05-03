@@ -22,12 +22,12 @@ def generate_metadata_from_chunk(chunk: str) -> Dict[str, str]:
         messages = [
             {
                 "role": "system",
-                "content": "You are a tool that extracts keywords from text. Respond only with a plain list of keywords, seperated by commas."
+                "content": "You are a tool that summarizes paragraphs of text. Be concise and to the point. Summary should be no more than 15 words."
             },
 
             {
                 "role": "user",
-                "content": f"Extract keywords from the following text:\n{chunk}"
+                "content": f"Summarize the following text:\n{chunk}"
             }
         ], 
         model= "llama-3.3-70b"

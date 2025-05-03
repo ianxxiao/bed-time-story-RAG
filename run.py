@@ -57,12 +57,12 @@ def main():
                 "book": book
             })
 
-            db.collection("stories").add(chunks_with_embeddings_metadata[i])
+            db.collection("stories").document(chunks_with_embeddings_metadata[i]["text"]).set(chunks_with_embeddings_metadata[i])
 
         #4. Save chunks to a file
         chunks_dir = Path(__file__).parent / "data" / "chunks"
         chunks_dir.mkdir(parents=True, exist_ok=True)
-        with open(chunks_dir / f"chunks_{book}_embed_metadata_{int(time.time())}.json", "w") as f:
+        with open(chunks_dir / f"chunks_{book}_embed_metadata.json", "w") as f:
             json.dump(chunks_with_embeddings_metadata, f)
 
 if __name__ == "__main__":
