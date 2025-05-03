@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 from pathlib import Path
 from OCR import perform_ocr_file
 from chunking import fixed_chunk_size, fixed_chunk_overlap
@@ -13,12 +11,13 @@ from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 import firebase_admin
 from firebase_admin import credentials, firestore
+import json
 
 def main():
     """
     Main function to run RAG pipelien.
     """
-    book = "The Blue Fairy Book"
+    book = "TheBlueFairyBook"
     raw_file_path = Path(__file__).parent / "rawData" / "TheBlueFairyBook.pdf"
     cred = credentials.Certificate("bed-time-story-23cd6-firebase-adminsdk-fbsvc-d1d12b089d.json")
     firebase_admin.initialize_app(cred)
@@ -50,9 +49,11 @@ def main():
 
             db.collection("stories").add(chunks_with_embeddings_metadata[i])
 
-        #4. Upload the chunks to Firebase
-
-        pprint(chunks_with_embeddings_metadata[0:2])
+        #4. Save chunks to a file
+        chunks_dir = Path(__file__).parent / "data" / "chunks"
+        chunks_dir.mkdir(parents=True, exist_ok=True)
+        with open(chunks_dir / f"chunks_{book}_embed_metadata_{int(time.time())}.json", "w") as f:
+            json.dump(chunks_with_embeddings_metadata, f)
 
 if __name__ == "__main__":
     main()
