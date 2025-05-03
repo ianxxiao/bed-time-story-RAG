@@ -18,13 +18,23 @@ def main():
     Main function to run RAG pipelien.
     """
     book = "TheBlueFairyBook"
-    raw_file_path = Path(__file__).parent / "rawData" / "TheBlueFairyBook.pdf"
+    raw_file_path = Path(__file__).parent / "data" / "rawData" / "TheBlueFairyBook.pdf"    
     cred = credentials.Certificate("bed-time-story-23cd6-firebase-adminsdk-fbsvc-d1d12b089d.json")
     firebase_admin.initialize_app(cred)
     db = firestore.client()
 
     #1. Convert the document to markdown
-    success, error, combined_markdown, raw_markdown = perform_ocr_file(raw_file_path)
+    markdown_data_dir = Path(__file__).parent / "data" / "markdownData"
+    combined_path = markdown_data_dir / f"{raw_file_path.stem}_combined.md"
+    raw_path = markdown_data_dir / f"{raw_file_path.stem}_raw.md"
+    
+    if not combined_path.exists() or not raw_path.exists():
+        success, error, combined_markdown, raw_markdown = perform_ocr_file(raw_file_path)
+    else:
+        print(f" >>> Using existing markdown files for {raw_file_path.stem}")
+        success = True
+        combined_markdown = combined_path.read_text()
+        raw_markdown = raw_path.read_text()
 
     if success:
         #2. Chunk the markdown into sections
