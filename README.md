@@ -1,3 +1,5 @@
 # bed-time-story-RAG
-The RAG pipeline for the Bed Time Story App
-![image](https://github.com/user-attachments/assets/09ef58b2-01b2-41da-b63c-b0985432355e)
+The RAG pipeline and Terminal app for the Bed Time Story App
+
+![image](https://github.com/user-attachments/assets/c87e3ff2-b231-416e-be83-cb6d84854c02)
+
