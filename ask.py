@@ -6,6 +6,10 @@ import os
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+
+# Set tokenizers parallelism to false to avoid warnings
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -91,8 +95,12 @@ def load_chunks():
     """
     Load chunks from the JSON file.
     """
-    with open(Path(__file__).parent / "data" / "chunks" / "chunks_TheBlueFairyBook_embed_metadata.json", 'r') as f:
-        return json.load(f)
+    chunks_dir = Path(__file__).parent / "data" / "chunks"
+    all_chunks = []
+    for json_file in chunks_dir.glob("chunks_*_embed_metadata.json"):
+        with open(json_file, 'r') as f:
+            all_chunks.extend(json.load(f))
+    return all_chunks
     
 def search_chunks(chunks, search_phrase):
     """
