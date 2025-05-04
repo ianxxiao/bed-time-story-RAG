@@ -121,10 +121,14 @@ def search_chunks(chunks, search_phrase):
         model = SentenceTransformer("all-MiniLM-L6-v2")
         search_embedding = model.encode(search_phrase)
         similarities = []
+
+        print(f" >>> Searching for {search_phrase}")
+        
         for chunk in chunks:
             metadata_embedding = model.encode(chunk['metadata'])
             similarity = cosine_similarity([search_embedding], [metadata_embedding])[0][0]
             similarities.append((chunk, similarity))
+        
         # Sort by similarity score in descending order
         similarities.sort(key=lambda x: x[1], reverse=True)
         

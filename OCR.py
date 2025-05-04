@@ -82,7 +82,7 @@ def perform_ocr_file(file, ocr_method="Mistral OCR"):
             combined_markdown, raw_markdown = get_combined_markdown(ocr_response)
 
             # Save processed data to files
-            print("\n >>>Saving Markdown files")
+            print("\n >>> Saving Markdown files")
             markdown_data_dir = Path(__file__).parent / "data" / "markdownData"
             ensure_directory_exists(markdown_data_dir)
             

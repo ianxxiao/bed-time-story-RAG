@@ -12,12 +12,15 @@ from sentence_transformers import SentenceTransformer
 import firebase_admin
 from firebase_admin import credentials, firestore
 import json
+import os
+# Set tokenizers parallelism to false to avoid warnings
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def main():
     """
     Main function to run RAG pipelien.
     """
-    book = "TheGreenFairyBook"
+    book = "PeterPan"
     raw_file_path = Path(__file__).parent / "data" / "rawData" / f"{book}.pdf"    
     cred = credentials.Certificate("bed-time-story-23cd6-firebase-adminsdk-fbsvc-d1d12b089d.json")
     firebase_admin.initialize_app(cred)
@@ -38,9 +41,11 @@ def main():
 
     if success:
         #2. Chunk the markdown into sections
+        print(f" >>> Chunking {raw_file_path.stem}")
         chunks = fixed_chunk_overlap(raw_markdown)
 
         #3. Embed the chunks
+        print(f" >>> Embedding {raw_file_path.stem}")
         model = SentenceTransformer("all-MiniLM-L6-v2")
         embeddings = model.encode(chunks)
 
