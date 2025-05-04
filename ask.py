@@ -4,7 +4,8 @@ from cerebras.cloud.sdk import Cerebras
 from pprint import pprint
 import os
 from dotenv import load_dotenv
-
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 # Load environment variables from .env file
 load_dotenv()
 
@@ -24,27 +25,53 @@ def create_story_from_chunks(chunks):
     
     client = Cerebras(api_key=API_KEY)
 
-    # Combine text from all chunks
-    combined_text = "\n".join([f"\nSummary: {chunk['metadata']} \nFull Text: {chunk['text']}" for chunk in chunks])
-    
-    # Create prompt for story generation    
-    prompt = f"""Here are some story excerpts:\n {combined_text} \n You must use characters from the excerpts while adding new plots. The story should be about 300 words long."""
+    try:
+        # Combine text from all chunks
+        combined_text = "\n".join([f"\nSummary: {chunk['metadata']} \nFull Text: {chunk['text']}" for chunk in chunks])
+        
+        # Create prompt for story generation    
+        prompt = f"""Here are some story excerpts:\n {combined_text} \n You must use characters from the excerpts while adding new plots. The story should be about 300 words long."""
 
-    # Generate new story using Llama
-    chat_completion = client.chat.completions.create(
-        messages=[
-            {
-                "role": "system", 
-                "content": "You are a creative storyteller who writes fairy tales in a classic style for children."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        model="llama-3.3-70b",
-        temperature=0.9
-    )
+        # Generate new story using Llama
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "You are a creative storyteller who writes fairy tales in a classic style for children."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            model="llama-3.3-70b",
+            temperature=0.9
+        )
+    except Exception as e:
+        if hasattr(e, 'status_code') and e.status_code == 400:
+            # Randomly select 3 chunks if we get a 400 error
+            import random
+            selected_chunks = random.sample(chunks, min(3, len(chunks)))
+            combined_text = "\n".join([f"\nSummary: {chunk['metadata']} \nFull Text: {chunk['text']}" for chunk in selected_chunks])
+            
+            prompt = f"""Here are some story excerpts:\n {combined_text} \n You must use characters from the excerpts while adding new plots. The story should be about 300 words long."""
+
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": "You are a creative storyteller who writes fairy tales in a classic style for children."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                model="llama-3.3-70b",
+                temperature=0.9
+            )
+        else:
+            raise e
 
     return chat_completion.choices[0].message.content
 
@@ -56,15 +83,8 @@ def get_user_inputs():
     # Get search phrase
     search_phrase = input("Enter a short phrase to search for in the chunks: ")
 
-    # Get chunk parameters
-    chunk_size = input("Enter chunk size (default 1000): ") or 1000
-    chunk_overlap = input("Enter chunk overlap (default 200): ") or 200
-
-
     return {
-        "search_phrase": search_phrase,
-        "chunk_size": int(chunk_size),
-        "chunk_overlap": int(chunk_overlap),
+        "search_phrase": search_phrase
     }
 
 def load_chunks():
@@ -79,10 +99,29 @@ def search_chunks(chunks, search_phrase):
     Search for the phrase in the chunks.
     """
     results = []
-    for chunk in chunks:
-        if search_phrase.lower() in chunk['metadata'].lower():
-            results.append(chunk)
-    return results
+
+    if len(search_phrase.split()) == 1:
+        # For single word searches, use simple string matching
+        for chunk in chunks:
+            if search_phrase.lower() in chunk['metadata'].lower():
+                results.append(chunk)
+            
+        return results
+    
+    else:
+        # For multi-word searches, use ranking
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        search_embedding = model.encode(search_phrase)
+        similarities = []
+        for chunk in chunks:
+            metadata_embedding = model.encode(chunk['metadata'])
+            similarity = cosine_similarity([search_embedding], [metadata_embedding])[0][0]
+            similarities.append((chunk, similarity))
+        # Sort by similarity score in descending order
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        
+        # Return top 5 results
+        return [chunk for chunk, score in similarities[:5]]
 
 # Example usage
 if __name__ == "__main__":

@@ -17,8 +17,8 @@ def main():
     """
     Main function to run RAG pipelien.
     """
-    book = "TheBlueFairyBook"
-    raw_file_path = Path(__file__).parent / "data" / "rawData" / "TheBlueFairyBook.pdf"    
+    book = "TheGreenFairyBook"
+    raw_file_path = Path(__file__).parent / "data" / "rawData" / f"{book}.pdf"    
     cred = credentials.Certificate("bed-time-story-23cd6-firebase-adminsdk-fbsvc-d1d12b089d.json")
     firebase_admin.initialize_app(cred)
     db = firestore.client()
@@ -58,7 +58,7 @@ def main():
                 "book": book
             })
 
-            db.collection("stories").document(chunks_with_embeddings_metadata[i]["chunk_idx"]).set(chunks_with_embeddings_metadata[i])
+            db.collection(book).document(chunks_with_embeddings_metadata[i]["chunk_idx"]).set(chunks_with_embeddings_metadata[i])
 
         #4. Save chunks to a file
         chunks_dir = Path(__file__).parent / "data" / "chunks"
